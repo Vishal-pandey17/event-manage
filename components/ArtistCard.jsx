@@ -1,28 +1,50 @@
 "use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const ArtistCard = ({ artistData }) => {
+  const [imageError, setImageError] = useState(false);
+  const defaultImage = "https://picsum.photos/200/200";
+  const router = useRouter();
+
+  const handleViewEvents = () => {
+    const encodedArtistName = encodeURIComponent(artistData.name);
+    router.push(`/events?artist=${encodedArtistName}`);
+  };
 
   return (
-    <div className="hover-inverse group w-[20%] min-w-[300px]  h-fit flex text-center justify-center transform transition-transform duration-400 hover:scale-110 hover:bg-gradient-to-r hover:from-orange-200 hover:to-white text-dark m-4 border-slate-400 border rounded-md px-8 py-2.5">
-     
-        <div>
+    <div className="hover-inverse group w-full sm:w-[45%] lg:w-[30%] xl:w-[23%] h-fit flex flex-col items-center transform transition-transform duration-400 hover:scale-105 hover:bg-gradient-to-r hover:from-orange-200 hover:to-white text-dark border-slate-400 border rounded-lg p-6">
+      <div className="text-center">
+        <div className="relative w-32 h-32 mx-auto mb-4">
           <img
-            className="w-24 h-24 mb-3 group-hover:filter-none rounded-full shadow-lg m-auto"
-            src={artistData.image}
-            alt={`${artistData.name} image`}
+            className="w-full h-full object-cover rounded-full shadow-lg group-hover:filter-none"
+            src={imageError ? defaultImage : (artistData.image || defaultImage)}
+            alt={`${artistData.name || 'Artist'}`}
+            onError={() => setImageError(true)}
           />
-          <p>{artistData.location}</p>
-          <h2 className="text-2xl font-bold">{artistData.name}</h2>
-          <p>{artistData.description}</p>
-          <div className="flex justify-between items-center mt-10">
-            <h3 className="text-2xl">{artistData.artist}</h3>
-          </div>
-          <button
-            className=" bg-gradient-to-r from-orange-400 to-teal-600 text-white px-4 py-2 rounded-md font-medium hover:opacity-70"
+        </div>
+        
+        <h2 className="text-2xl font-bold mb-2">
+          {artistData.name || "Unknown Artist"}
+        </h2>
+        
+        <p className="text-gray-600 mb-2">
+          {artistData.location || "Location not specified"}
+        </p>
+        
+        <p className="text-gray-700 mb-6 line-clamp-3">
+          {artistData.description || "No description available"}
+        </p>
+
+        <div className="flex flex-col gap-2">
+          <button 
+            onClick={handleViewEvents}
+            className="w-full bg-gradient-to-r from-orange-400 to-teal-600 text-white px-6 py-2 rounded-md font-medium hover:opacity-80 transition-opacity"
           >
             View Events
           </button>
         </div>
+      </div>
     </div>
   );
 };
