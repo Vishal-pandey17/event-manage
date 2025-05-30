@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import EventCard from "@/components/EventCard";
 import { useSearchParams } from "next/navigation";
 
+// Add export const dynamic = 'force-dynamic' to disable static generation
+export const dynamic = 'force-dynamic';
+
 export default function EventsPage() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -10,18 +13,20 @@ export default function EventsPage() {
     const searchParams = useSearchParams();
     
     // Get both artist and tag filters
-    const artistName = searchParams.get('artist');
-    const tagName = searchParams.get('tag');
+    const artistName = searchParams?.get('artist');
+    const tagName = searchParams?.get('tag');
 
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const response = await fetch("https://qevent-backend.labs.crio.do/events");
+                const response = await fetch("https://qevent-backend.labs.crio.do/events", {
+                    // Add cache: 'no-store' to disable caching
+                    cache: 'no-store'
+                });
                 if (!response.ok) {
                     throw new Error("Failed to fetch events");
                 }
                 const data = await response.json();
-                console.log("API Response:", data); // Let's see what the data looks like
 
                 // Transform the data and apply filters
                 let filteredEvents = data.map(event => ({
@@ -49,7 +54,7 @@ export default function EventsPage() {
 
                 setEvents(filteredEvents);
             } catch (err) {
-                console.error("Fetch error:", err); // Log any errors
+                console.error("Fetch error:", err);
                 setError(err.message);
             } finally {
                 setLoading(false);
@@ -57,24 +62,24 @@ export default function EventsPage() {
         };
 
         fetchEvents();
-    }, [artistName, tagName]); // Re-fetch when either filter changes
+    }, [artistName, tagName]);
 
     if (loading) {
         return (
-          <div className="container mx-auto p-8 text-center">
-            <div className="text-2xl">Loading events...</div>
-          </div>
+            <div className="container mx-auto p-8 text-center">
+                <div className="text-2xl">Loading events...</div>
+            </div>
         );
-      }
+    }
 
-      if (error) {
+    if (error) {
         return (
-          <div className="container mx-auto p-8 text-center">
-            <div className="text-2xl text-red-500">Error: {error}</div>
-          </div>
+            <div className="container mx-auto p-8 text-center">
+                <div className="text-2xl text-red-500">Error: {error}</div>
+            </div>
         );
-      } 
-    
+    }
+
     // Determine the page title based on filters
     const getPageTitle = () => {
         if (tagName) {
